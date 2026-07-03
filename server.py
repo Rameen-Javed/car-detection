@@ -41,7 +41,7 @@ def run_server():
             else:
                 raise e
         except KeyboardInterrupt:
-            print("\nShutting down server. Goodbye!")
+            print("\nShutting down server.... Goodbye!")
             sys.exit(0)
 
 if __name__ == "__main__":
