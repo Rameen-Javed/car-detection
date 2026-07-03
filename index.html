@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoDetect AI - Car & Vehicle Detection</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-car-side logo-icon"></i>
+                <div class="brand-text">
+                    <h1>AutoDetect AI</h1>
+                    <span>Computer Vision Studio</span>
+                </div>
+            </div>
+
+            <div class="section-card status-card">
+                <h3><i class="fa-solid fa-circle-nodes"></i> Model Status</h3>
+                <div id="model-status" class="status-indicator loading">
+                    <span class="pulse"></span>
+                    <span class="status-text">Loading COCO-SSD Model...</span>
+                </div>
+                <div class="performance-metrics hidden" id="metrics">
+                    <div class="metric">
+                        <span class="metric-label">Inference Time:</span>
+                        <span class="metric-value" id="inference-time">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-card controls-card">
+                <h3><i class="fa-solid fa-sliders"></i> Parameters</h3>
+                <div class="control-group">
+                    <div class="control-header">
+                        <label for="threshold-slider">Confidence Threshold</label>
+                        <span id="threshold-val">50%</span>
+                    </div>
+                    <input type="range" id="threshold-slider" min="10" max="95" value="50" step="5">
+                    <span class="control-help">Filter detections below this confidence score.</span>
+                </div>
+            </div>
+
+            <div class="section-card results-card">
+                <h3><i class="fa-solid fa-chart-simple"></i> Detections Summary</h3>
+                <div id="detection-list" class="detection-list">
+                    <p class="no-detections-text">Upload an image to run vehicle detection.</p>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <p>Powered by TensorFlow.js & COCO-SSD</p>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <header class="app-header">
+                <h2>Real-Time Vehicle Recognition</h2>
+                <p>Upload any picture to identify cars, trucks, buses, and motorcycles instantly.</p>
+            </header>
+
+            <div class="workspace-area">
+                <!-- Dropzone Area -->
+                <div id="dropzone" class="dropzone">
+                    <input type="file" id="file-input" accept="image/*" class="file-input">
+                    <div class="dropzone-content">
+                        <div class="upload-icon-container">
+                            <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                        </div>
+                        <h3>Drag & drop your image here</h3>
+                        <p class="or-divider">or</p>
+                        <button class="btn btn-primary" id="browse-btn">Browse Files</button>
+                        <p class="file-specs">Supports PNG, JPG, JPEG, WebP</p>
+                    </div>
+                </div>
+
+                <!-- Preview Area -->
+                <div id="preview-container" class="preview-container hidden">
+                    <div class="canvas-wrapper">
+                        <canvas id="detection-canvas"></canvas>
+                        <div id="processing-overlay" class="processing-overlay hidden">
+                            <div class="spinner"></div>
+                            <p>Analyzing image...</p>
+                        </div>
+                    </div>
+                    <div class="preview-actions">
+                        <button class="btn btn-secondary" id="reset-btn">
+                            <i class="fa-solid fa-arrow-rotate-left"></i> Upload New Image
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Test Gallery -->
+            <section class="gallery-section">
+                <h3><i class="fa-solid fa-images"></i> Quick Test Gallery</h3>
+                <div class="gallery-grid">
+                    <div class="gallery-card" data-url="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80">
+                        <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=200&q=80" alt="Sports Car" crossorigin="anonymous">
+                        <div class="gallery-overlay">
+                            <span>Sports Car</span>
+                        </div>
+                    </div>
+                    <div class="gallery-card" data-url="https://images.unsplash.com/photo-1494783367193-149034c05e8f?auto=format&fit=crop&w=800&q=80">
+                        <img src="https://images.unsplash.com/photo-1494783367193-149034c05e8f?auto=format&fit=crop&w=200&q=80" alt="Street Traffic" crossorigin="anonymous">
+                        <div class="gallery-overlay">
+                            <span>Traffic</span>
+                        </div>
+                    </div>
+                    <div class="gallery-card" data-url="https://images.unsplash.com/photo-1525609004556-c46c7d6cf0a3?auto=format&fit=crop&w=800&q=80">
+                        <img src="https://images.unsplash.com/photo-1525609004556-c46c7d6cf0a3?auto=format&fit=crop&w=200&q=80" alt="Classic Car" crossorigin="anonymous">
+                        <div class="gallery-overlay">
+                            <span>Classic Car</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- TensorFlow.js and COCO-SSD -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+    <!-- Custom Application Script -->
+    <script src="app.js"></script>
+</body>
+</html>
